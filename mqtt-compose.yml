@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  mqtt:
+    image: millegalb/dotnet-mqtt:latest
+    #ports:
+    #  - 8883:8883
+    networks:
+      - skynet
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.tcp.routers.mqtt-tls.rule=HostSNI(`mqtt.qaybe.de`)"
+        - "traefik.tcp.routers.mqtt-tls.entrypoints=mq-tls"
+        - "traefik.tcp.routers.mqtt-tls.tls=true"
+        - "traefik.tcp.routers.mqtt-tls.service=mqtt-tls"
+        - "traefik.tcp.services.mqtt-tls.loadbalancer.server.port=8883"
+        
+        - "traefik.tcp.routers.mqtt.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.mqtt.entrypoints=mq"
+        - "traefik.tcp.routers.mqtt.service=mqtt"
+        - "traefik.tcp.services.mqtt.loadbalancer.server.port=8883"
+        
+networks:
+    skynet:
+        external: true
