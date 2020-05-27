@@ -4,6 +4,13 @@ services:
     image: millegalb/dotnet-mqtt:latest
     networks:
       - skynet
+    secrets:
+      - sec_postgres_mqtt
+    environment:
+      - database=mqttBase
+      - host=postgres
+      - port=5432
+      - username=admin
     deploy:
       labels:
         - "traefik.enable=true"
