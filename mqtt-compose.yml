@@ -2,8 +2,6 @@ version: '3.7'
 services:
   mqtt:
     image: millegalb/dotnet-mqtt:latest
-    #ports:
-    #  - 8883:8883
     networks:
       - skynet
     deploy:
@@ -19,7 +17,30 @@ services:
         - "traefik.tcp.routers.mqtt.entrypoints=mq"
         - "traefik.tcp.routers.mqtt.service=mqtt"
         - "traefik.tcp.services.mqtt.loadbalancer.server.port=8883"
+  postgres:
+    image: postgres:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.hostname == titan.marcelbenders.de]
+    networks:
+      - skynet
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/sec_postgres_mqtt
+      - POSTGRES_USER=admin
+    volumes:
+      - postgres_mqtt:/var/lib/postgresql/data
+    secrets:
+      - sec_postgres_mqtt
+
+secrets:
+  sec_postgres_mqtt:
+    external: true
         
 networks:
-    skynet:
-        external: true
+  skynet:
+    external: true
+volumes:
+  postgres_mqtt:
