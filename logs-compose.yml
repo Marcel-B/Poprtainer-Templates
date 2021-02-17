@@ -1,9 +1,12 @@
 version: '3.7'
 services:
     seq:
+       version: '3.7'
+services:
+    seq:
         image: datalust/seq
-        ports:
-            - 8956:5341
+        #ports:
+        #    - 8956:5341
         networks:
             - skynet
         volumes:
@@ -24,9 +27,18 @@ services:
                 #- "traefik.http.routers.seq-http.middlewares=https-only@docker"
 
                 #- "traefik.http.routers.seq-https.middlewares=test-header@docker"
+                - "traefik.http.routers.seq-log-https.entrypoints=websecure"
+                - "traefik.http.routers.seq-log-https.rule=Host(`log.qaybe.de`)"
+                - "traefik.http.routers.seq-log-https.tls=true"
+                - "traefik.http.routers.seq-log-https.service=seq-log-service"
+                - "traefik.http.routers.seq-log-https.tls.certresolver=sec"
+
+                - "traefik.http.services.seq-log-service.loadbalancer.server.port=5341"
+                
                 - "traefik.http.routers.seq-https.entrypoints=websecure"
-                - "traefik.http.routers.seq-https.rule=Host(`log.qaybe.de`)"
+                - "traefik.http.routers.seq-https.rule=Host(`seq.qaybe.de`)"
                 - "traefik.http.routers.seq-https.tls=true"
+                - "traefik.http.routers.seq-https.service=seq-service"
                 - "traefik.http.routers.seq-https.tls.certresolver=sec"
 
                 - "traefik.http.services.seq-service.loadbalancer.server.port=80"
@@ -35,3 +47,4 @@ volumes:
 networks:
     skynet:
         external: true
+
