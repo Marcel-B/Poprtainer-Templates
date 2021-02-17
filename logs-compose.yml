@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+    seq:
+        image: datalust/seq
+        ports:
+            - 8956:5341
+        networks:
+            - skynet
+        volumes:
+            - seq_logs:/data
+        environment:
+            ACCEPT_EULA: "Y"
+            
+        deploy:
+            replicas: 1
+            placement:
+                constraints: [node.role == manager]
+            restart_policy:
+                condition: on-failure
+            labels:
+                - "traefik.enable=true"
+                #- "traefik.http.routers.seq-http.entrypoints=web"
+                #- "traefik.http.routers.seq-http.rule=Host(`seqlog.qaybe.de`)"
+                #- "traefik.http.routers.seq-http.middlewares=https-only@docker"
+
+                #- "traefik.http.routers.seq-https.middlewares=test-header@docker"
+                - "traefik.http.routers.seq-https.entrypoints=websecure"
+                - "traefik.http.routers.seq-https.rule=Host(`log.qaybe.de`)"
+                - "traefik.http.routers.seq-https.tls=true"
+                - "traefik.http.routers.seq-https.tls.certresolver=sec"
+
+                - "traefik.http.services.seq-service.loadbalancer.server.port=80"
+volumes:
+    seq_logs:
+networks:
+    skynet:
+        external: true
